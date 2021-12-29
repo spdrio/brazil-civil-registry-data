@@ -12,35 +12,43 @@ Also, the site scrapping is a continuous, incremental and lengthy process, and m
 
 ## Tables
 
-### civil_registry_deaths.csv
-Scrap of death registries at https://transparencia.registrocivil.org.br/registros
+### civil_registry_xxxxx.csv
+Registrations at https://transparencia.registrocivil.org.br/registros
 
-Monthly entries, contains all the cities and states, from 2015 to 2020
+Monthly entries, contains all the reported cities and states, since 2015, there are multiple sub-types, see below.
 
 | name | type | notes |
 |-----------------|---------|-----------------------------------------------------|
-| start_date | date | yyyy-mm-dd |
-| end_date | date | yyyy-mm-dd |
-| state | string | UF code |
-| state_ibge_code | integer | state ibge code |
-| city | string | city name, if empty then deaths_total are state-wise |
-| city_ibge_code | integer | city ibge code, if empty then deaths_total are state-wise |
-| deaths_total | integer | total death registries at date |
-| created_at | datetime | yyyy-mm-dd hh:mm<br>approximated time the request to the server was made |
+| start_date | date | yyyy-mm-dd<br>Registration date period start (inclusive) |
+| end_date | date | yyyy-mm-dd<br>Registration date period end (inclusive) |
+| state | string | Registration UF code |
+| state_ibge_code | integer | Registration state ibge code |
+| city | string | Registration city name, if empty then deaths_total are state-wise |
+| city_ibge_code | integer | Registration city ibge code, if empty then deaths_total are state-wise |
+| xxxxx_total | integer | Total registrations at date |
+| created_at | datetime | yyyy-mm-dd hh:mm<br>Approximated time the request to the server was made |
+
+#### civil_registry_deaths.csv
+Scrap of all-cause death registrations
+
+#### civil_registry_births.csv
+Scrap of birth certificates registrations
 
 ### civil_registry_covid_xxxxx.csv
-Scrap of covid-related deaths at https://transparencia.registrocivil.org.br/registral-covid
+Scrap of natural-cause deaths at https://transparencia.registrocivil.org.br/especial-covid (from Causas Cardiacas)
+
+**Notice** : The name covid comes from their panel, actually the table contains natural causes, not only covid deaths.
 
 Daily entries, there are multiple sub-types, see below.
 
 | name | type | notes |
 |-----------------|---------|-----------------------------------------------------|
-| date | date | yyyy-mm-dd |
-| state | string | UF code |
-| state_ibge_code | integer | state ibge code |
-| city | string | [optional] city name |
-| city_ibge_code | integer | [optional] city ibge code |
-| places | string | [optional] place(s) where the deaths occurred, comma separated<br>(hospital, home, public, others) |
+| date | date | yyyy-mm-dd<br>Ocurrence date | 
+| state | string | Ocurrence UF code |
+| state_ibge_code | integer | Ocurrence state ibge code |
+| city | string | [optional] Ocurrence city name |
+| city_ibge_code | integer | [optional] Ocurrence city ibge code |
+| place | string | [optional] place(s) where the deaths occurred, + separated<br>(hospital, home, public, others) |
 | gender | string | [optional] F, M |
 | age_group | string | [optional] age group <br>(9-, 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, 80-89, 90-99, 100+, NA) |
 | deaths_sars | integer | Number of SARS deaths (SRAG) |
@@ -64,24 +72,31 @@ On the site, there are some displayed aggregations:
 
 | Name | Aggregation |
 | --- | --- |
-| COVID-19 | COVID + COVID_AVC + COVID_INFARTO |
-| Demais óbitos cardiovasculares | CARDIOPATIA + CHOQUE_CARD + SUBITA |
+| COVID-19 | deaths_covid19 + deaths_stroke_covid19 + deaths_heart_attack_covid19 |
+| Demais óbitos cardiovasculares | deaths_cardiopathy + deaths_cardiogenic_shock + deaths_sudden_cardiac |
 
 #### civil_registry_covid_states.csv
-Partial table for all the 27 brazilian states (no gender or age group), from 2018+
+Table (no gender nor age group) for all the 27 brazilian states, since 2018
 
 #### civil_registry_covid_cities.csv
-Partial table for all the brazilian cities over 100,000 population (2019), about 287 (no gender or age group), from 2018+
+Table (no gender nor age group) for brazilian cities over 100,000 population and capitals (about 317), since 2018
 
 #### civil_registry_covid_states_detailed.csv
-Full table for all the 27 brazilian states, 2019 and 2020
+Table (with gender and age group) for all the 27 brazilian states, since 2019
 
 #### civil_registry_covid_cities_detailed.csv
-Full table for all the brazilian cities over 500,000 population (2019), about 47, 2019+
+Table (with gender and age group) for brazilian cities over 500,000 population and capitals (about 56), since 2019
+
+**Notice:**
+Normaly the repo is updated daily, except for the detailed scraps that normally is on a weekly basis (they take more than one day to scrap).
 
 ## Changelog
+### 2021-04-10
+- Added `civil_registry_births.csv` containing birth certificates
+- In order to improve the scrapping speed, the detailed covid scraps now reuse data from older scraps, it if detect no data change in broader queries (quarter, monthly, etc). So the created_at columns may reflect older dates since no data actually changed and was reused.
+
 ### 2021-01-16
-Now includes year 2021, note that due to 2020 being a leap year, on years 2019 and 2021 detailed scraps of 29-Feb actually uses the data from 28-Feb.
+Now includes year 2021
 
 ### 2020-06-26
 Added cardiac causes, 7 more columns, from deaths_stroke to deaths_sudden_cardiac, as committed at [cd7a6b3](https://github.com/capyvara/brazil-civil-registry-data/commit/cd7a6b335398ea6b3ebf6beb45249fd1ee179b5d)
